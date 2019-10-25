@@ -12,7 +12,25 @@ RUN rm package.json
 COPY package.json package.json
 RUN npm install
 
-RUN npm -v
-RUN node -v
 EXPOSE 4200
-CMD npm start
+
+# ------ BACKEND
+
+# Install java
+RUN echo "deb http://deb.debian.org/debian stretch-backports main" >> /etc/apt/sources.list.d/nginx.list
+RUN apt-get update && apt-get -y dist-upgrade
+RUN apt-get -y -t stretch-backports install openjdk-8-jdk
+
+# install maven
+RUN apt-get -y install maven
+
+# clone Server
+WORKDIR /opt/ 
+RUN git clone https://github.com/MizarWeb/DataCubeServer.git \
+    && cd DataCubeServer \
+    && mvn clean install
+EXPOSE 8081
+
+COPY ./script.sh /
+RUN chmod +x /script.sh
+ENTRYPOINT ["/script.sh"]
