@@ -28,9 +28,14 @@ RUN apt-get -y install maven
 WORKDIR /opt/ 
 RUN git clone https://github.com/MizarWeb/DataCubeServer.git \
     && cd DataCubeServer \
-    && mvn clean install
+    && mkdir /data \
+    && sed -i -e '/workspace=/ s/=.*/=\/data\//' -e '/workspace_cube=/ s/=.*/=\/data\//' cubeExplorer.properties \
+    && sed -i -e '/workspace=/ s/=.*/=\/data\//' -e '/workspace_cube=/ s/=.*/=\/data\//' src/main/resources/conf/cubeExplorer.properties \
+    && mvn clean install 
+
 EXPOSE 8081
 
+# ------- RUN APPs
 COPY ./script.sh /
 RUN chmod +x /script.sh
 ENTRYPOINT ["/script.sh"]
